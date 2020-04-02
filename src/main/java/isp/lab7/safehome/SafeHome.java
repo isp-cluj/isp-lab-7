@@ -1,6 +1,6 @@
-package isp.lab6.exercise1;
+package isp.lab7.safehome;
 
-public class Exercise1 {
+public class SafeHome {
 
     public static void main(String[] args) {
 

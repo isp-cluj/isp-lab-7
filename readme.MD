@@ -10,7 +10,7 @@ Implement a safe home access Java application based on the diagram above. Consid
 3. If pin is correct door shall be opened or closed depending on current state (if open will be closed, if closed will be opened)
 4. All attempts (successful or not) will be logged in access log list
 
-**NOTE - Java project come with profiled unit tests. You should make sure all tests pass. You are not allowed to change unit tests (except initialisation of Controller object in the _instantiateDoorController()_ method.**
+**NOTE - Java project come with prefiled unit tests. You should make sure all tests pass. You are not allowed to change unit tests (except initialisation of Controller object in the _instantiateDoorController()_ method.**
 
 ## Exercise 2
 

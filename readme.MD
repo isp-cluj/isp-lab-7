@@ -1,7 +1,7 @@
-# Implement the following exercises
+# Lab 7 - Safe Home Access
 
 
-## Exercise 1 - Safe Home Access
+## Exercise 1 - Java implementation
 ![Exercise 1 image](docs/ex1.jpg)
 
 Implement a safe home access Java application based on the diagram above. Consider also following functional requirements in implementing your program:
@@ -12,11 +12,11 @@ Implement a safe home access Java application based on the diagram above. Consid
 
 **NOTE - Java project come with prefiled unit tests. You should make sure all tests pass. You are not allowed to change unit tests (except initialisation of Controller object in the _instantiateDoorController()_ method.**
 
-## Exercise 2
+## Exercise 2 - State machine diagram
 
 For Safe Home Access application create UML state machine diagram.  
 
-## Exercise 3
+## Exercise 3 - Use case diagram
 
 For Safe Home Access application create UML use case diagram. 
 

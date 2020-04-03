@@ -9,3 +9,14 @@ Implement a safe home access Java application based on the diagram above. Consid
 2. If 3 consecutive attempts are made to enter pin then door is locked forever and enterPin method shall throw TooManyAttemptsException 
 3. If pin is correct door shall be opened or closed depending on current state (if open will be closed, if closed will be opened)
 4. All attempts (successful or not) will be logged in access log list
+
+**NOTE - Java project come with profiled unit tests. You should make sure all tests pass. You are not allowed to change unit tests (except initialisation of Controller object in the _instantiateDoorController()_ method.**
+
+## Exercise 2
+
+For Safe Home Access application create UML state machine diagram.  
+
+## Exercise 3
+
+For Safe Home Access application create UML use case diagram. 
+

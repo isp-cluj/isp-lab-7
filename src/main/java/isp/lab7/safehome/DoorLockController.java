@@ -34,21 +34,20 @@ public class DoorLockController implements ControllerInterface {
 
         if (Objects.isNull(accessKeyEntry)) { // invalid pin
             currentRetries ++;
-            final AccessLog errorAccessLog = new AccessLog("-", LocalDateTime.now(), ENTER_PIN_OPERATION, door.getStatus(), "");
-
-            if (currentRetries >= MAX_RETRIES) { // max attempts
-                errorAccessLog.setErrorMessage("TooManyAttemptsException");
+            if (this.isPermanentlyLocked()) { // max attempts
                 this.currentRetries = 3;
-                this.accessLogs.add(errorAccessLog);
+                this.accessLogs.add(this.createAccessLog("", ENTER_PIN_OPERATION, "TooManyAttemptsException"));
                 throw new TooManyAttemptsException();
             } else {
-                errorAccessLog.setErrorMessage("InvalidPinException");
-                this.accessLogs.add(errorAccessLog);
+                this.accessLogs.add(this.createAccessLog("", ENTER_PIN_OPERATION, "InvalidPinException"));
                 throw new InvalidPinException();
             }
         } else { // valid pin
-            if (accessKeyEntry.getKey().getName().equals(ControllerInterface.MASTER_KEY)) { // reset retries
+            if (accessKeyEntry.getKey().getName().equals(ControllerInterface.MASTER_TENANT_NAME)) { // reset retries
                 this.currentRetries = 0;
+            } else if (this.isPermanentlyLocked()){
+                this.accessLogs.add(this.createAccessLog("", ENTER_PIN_OPERATION, "TooManyAttemptsException"));
+                throw new TooManyAttemptsException();
             }
 
             if (door.getStatus() == DoorStatus.OPEN) {
@@ -57,8 +56,7 @@ public class DoorLockController implements ControllerInterface {
                 door.unlockDoor();
             }
 
-            final AccessLog successAccessLog = new AccessLog("-", LocalDateTime.now(), ENTER_PIN_OPERATION, door.getStatus(), "");
-            this.accessLogs.add(successAccessLog);
+            this.accessLogs.add(this.createAccessLog("", ENTER_PIN_OPERATION, ""));
             return door.getStatus();
         }
     }
@@ -66,34 +64,38 @@ public class DoorLockController implements ControllerInterface {
     @Override
     public void addTenant(String pin, String name) throws Exception {
         final Tenant tenant = new Tenant(name);
-        final AccessLog accessLog = new AccessLog(name, LocalDateTime.now(), ADD_TENANT_OPERATION, door.getStatus(), "");
 
         if (this.validAccess.containsKey(tenant)) {
-            accessLog.setErrorMessage("TenantAlreadyExistsException");
-            this.accessLogs.add(accessLog);
+            this.accessLogs.add(this.createAccessLog(name, ENTER_PIN_OPERATION, "TenantAlreadyExistsException"));
             throw new TenantAlreadyExistsException();
         }
 
-        this.accessLogs.add(accessLog);
+        this.accessLogs.add(this.createAccessLog(name, ENTER_PIN_OPERATION, ""));
         this.validAccess.put(tenant, new AccessKey(pin));
     }
 
     @Override
     public void removeTenant(String name) throws Exception {
         final Tenant tenant = new Tenant(name);
-        final AccessLog accessLog = new AccessLog(name, LocalDateTime.now(), ADD_TENANT_OPERATION, door.getStatus(), "");
 
         if (!this.validAccess.containsKey(tenant)) {
-            accessLog.setErrorMessage("TenantNotFoundException");
-            this.accessLogs.add(accessLog);
+            this.accessLogs.add(this.createAccessLog(name, ADD_TENANT_OPERATION, "TenantNotFoundException"));
             throw new TenantNotFoundException();
         }
 
-        this.accessLogs.add(accessLog);
+        this.accessLogs.add(this.createAccessLog(name, ADD_TENANT_OPERATION, ""));
         this.validAccess.remove(tenant);
     }
 
     public List<AccessLog> getAccessLogs() {
         return accessLogs;
+    }
+
+    private AccessLog createAccessLog(final String tenant, final String operation, final String errMessage) {
+        return new AccessLog(tenant, LocalDateTime.now(), operation, this.door.getStatus(), errMessage);
+    }
+
+    private boolean isPermanentlyLocked() {
+        return this.currentRetries >= MAX_RETRIES;
     }
 }

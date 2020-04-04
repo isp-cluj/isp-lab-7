@@ -78,27 +78,31 @@ public class SafeHomeTest {
             fail("No exception should be thrown ");
         }
 
-        int errCount = 0;
         for (int i = 0; i < 2; i++) {
             try {
                 ctrl.enterPin("4532");
                 fail("Exception should be thrown!");
             } catch (Exception e) {
                 assertExceptionType(e, "InvalidPinException");
-                errCount++;
             }
         }//.for
 
 
+        // too many attempts exception with wrong pin
         try {
             ctrl.enterPin("4532");
             fail("Exception should be thrown!");
         } catch (Exception e) {
             assertExceptionType(e, "TooManyAttemptsException");
-            errCount++;
         }
 
-        assertEquals("Door is not permanently locked after too many attempts.", 3, errCount);
+        // too many attempts with correct pin
+        try {
+            ctrl.enterPin("1234");
+            fail("Exception should be thrown!");
+        } catch (Exception e) {
+            assertExceptionType(e, "TooManyAttemptsException");
+        }
     }
 
     @Test

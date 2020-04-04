@@ -1,106 +1,203 @@
 package isp.lab7.safehome;
 
-import org.easymock.Mock;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class SafeHomeTest {
 
     ControllerInterface ctrl;
 
     @Before
-    public void instantiateDoorController(){
+    public void instantiateDoorController() {
         //INITIALISE CONTROLLER OBJECT HERE
+        ctrl = new DoorLockController();
     }
 
     // >>>> DO NOT CHANGE CODE AFTER THIS LINE ! <<<<
 
     @Test
     public void whenCorrectPinDoorOpen() throws Exception {
-        ctrl.addTenant("12345", "Utilizator1");
-        assertEquals(DoorStatus.OPEN, ctrl.enterPin("12345"));
+        try {
+            ctrl.addTenant("12345", "User1");
+        } catch (Exception ex) {
+            fail("No exception should be added while creating new tenant");
+        }
+
+        assertEquals("Door status should be OPEN", DoorStatus.OPEN, ctrl.enterPin("12345"));
     }
 
     @Test
-    public void whenWrongPinThrowInvalidPinException(){
-        ctrl.addTenant("1234", "Utilizator1");
+    public void whenWrongPinThrowInvalidPinException() {
+        try {
+            ctrl.addTenant("12345", "User1");
+        } catch (Exception ex) {
+            fail("No exception should be added while creating new tenant");
+        }
+
         try {
             ctrl.enterPin("4532");
-        }catch(Exception e){
-            assertTrue(e.getClass().getCanonicalName().indexOf("InvalidPinException")!=-1);
+            fail("Exception should be thrown!");
+        } catch (Exception e) {
+            assertExceptionType(e, "InvalidPinException");
         }
     }
 
     @Test
-    public void whenTooManyAttemptsThrowTooManyAttemptsException(){
-        ctrl.addTenant("1234", "Utilizator1");
-        for(int i=0;i<4;i++){
-            try{
+    public void whenTooManyAttemptsThrowTooManyAttemptsException() {
+        try {
+            ctrl.addTenant("12345", "User1");
+        } catch (Exception ex) {
+            fail("No exception should be added while creating new tenant");
+        }
+
+        for (int i = 0; i < 2; i++) {
+            try {
                 ctrl.enterPin("4532");
-            }catch(Exception e){
-                System.out.println("Attempt "+i);
-                assertTrue("Wrong exception name.",e.getClass().getCanonicalName().indexOf("InvalidPinException")!=-1);
+                fail("Exception should be thrown!");
+            } catch (Exception e) {
+                System.out.println("Attempt " + i);
+                assertExceptionType(e, "InvalidPinException");
             }
         }//.for
 
         try {
             ctrl.enterPin("4532");
-        }catch(Exception e){
-            assertTrue("Wrong exception name.", e.getClass().getCanonicalName().indexOf("TooManyAttemptsException")!=-1);
+            fail("Exception should be thrown!");
+        } catch (Exception e) {
+            assertExceptionType(e, "TooManyAttemptsException");
         }
+    }
+
+    @Test
+    public void whenTooManyAttemptsDoorPermanentlyLocked() {
+        try {
+            ctrl.addTenant("1234", "User1");
+        } catch (Exception ex) {
+            fail("No exception should be thrown ");
+        }
+
+        int errCount = 0;
+        for (int i = 0; i < 2; i++) {
+            try {
+                ctrl.enterPin("4532");
+                fail("Exception should be thrown!");
+            } catch (Exception e) {
+                assertExceptionType(e, "InvalidPinException");
+                errCount++;
+            }
+        }//.for
+
+
+        try {
+            ctrl.enterPin("4532");
+            fail("Exception should be thrown!");
+        } catch (Exception e) {
+            assertExceptionType(e, "TooManyAttemptsException");
+            errCount++;
+        }
+
+        assertEquals("Door is not permanently locked after too many attempts.", 3, errCount);
+    }
+
+    @Test
+    public void whenDoorPermanentlyLockedAndMasterKeyIsUsedThanRetriesCountShouldBeReset() throws Exception {
+        try {
+            ctrl.addTenant("1234", "User1");
+        } catch (Exception ex) {
+            fail("No exception should be thrown ");
+        }
+
+        for (int i = 0; i < 2; i++) {
+            try {
+                ctrl.enterPin("4532");
+                fail("Exception should be thrown!");
+            } catch (Exception e) {
+                System.out.println("Attempt " + i);
+                assertExceptionType(e, "InvalidPinException");
+            }
+        }//.for
+
+        try {
+            ctrl.enterPin("4532");
+            fail("Exception should be thrown!");
+        } catch (Exception e) {
+            assertExceptionType(e, "TooManyAttemptsException");
+        }
+
+        // use master key
+        assertEquals("Status should be OPEN", DoorStatus.OPEN, ctrl.enterPin(ControllerInterface.MASTER_KEY));
+
+        // old tenant can use now the key again
+        assertEquals("Status should be CLOSE", DoorStatus.CLOSE, ctrl.enterPin("1234"));
     }
 
     @Test
     public void whenEnterPinDoorRevertStatus() throws Exception {
-        ctrl.addTenant("12345", "Utilizator1");
-        assertEquals(DoorStatus.OPEN, ctrl.enterPin("12345"));
-        assertEquals(DoorStatus.CLOSE, ctrl.enterPin("12345"));
-        assertEquals(DoorStatus.OPEN, ctrl.enterPin("12345"));
-        assertEquals(DoorStatus.CLOSE, ctrl.enterPin("12345"));
-    }
-
-    @Test
-    public void whenTooManyAttemptsDoorPermanetlyLocked(){
-        ctrl.addTenant("1234", "Utilizator1");
-        for(int i=0;i<4;i++){
-            try{
-                ctrl.enterPin("4532");
-            }catch(Exception e){
-                System.out.println("Attempt "+i);
-                assertTrue("Wrong exception name.",e.getClass().getCanonicalName().indexOf("InvalidPinException")!=-1);
-            }
-        }//.for
-
-
-        int errCount = 0;
-        for(int i=0;i<4;i++) {
-            try {
-                ctrl.enterPin("4532");
-            } catch (Exception e) {
-                assertTrue("Wrong exception name.", e.getClass().getCanonicalName().indexOf("TooManyAttemptsException") != -1);
-                errCount++;
-            }
+        try {
+            ctrl.addTenant("12345", "User1");
+        } catch (Exception ex) {
+            fail("No exception should be added while creating new tenant");
         }
 
-        assertEquals("Door is not permanently locked after too many attempts.", 4, errCount);
-
+        assertEquals("Status should be OPEN", DoorStatus.OPEN, ctrl.enterPin("12345"));
+        assertEquals("Status should be CLOSE", DoorStatus.CLOSE, ctrl.enterPin("12345"));
+        assertEquals("Status should be OPEN", DoorStatus.OPEN, ctrl.enterPin("12345"));
+        assertEquals("Status should be CLOSE", DoorStatus.CLOSE, ctrl.enterPin("12345"));
     }
 
     @Test
-    public void whenTenantRemovedAccessIsALsoRemoved() throws Exception{
-        ctrl.addTenant("12345", "Utilizator1");
+    public void whenTenantDoesNotExistThanTenantIsAdded() throws Exception {
+        ctrl.addTenant("12345", "User1");
+        assertEquals("Door status should be OPEN", DoorStatus.OPEN, ctrl.enterPin("12345"));
+    }
+
+    @Test
+    public void whenTenantAlreadyExistsThanExceptionShouldBeThrown() {
+        try {
+            ctrl.addTenant("12345", "User1");
+        } catch (Exception ex) {
+            fail("No exception should be added while creating new tenant");
+        }
+
+        try {
+            ctrl.addTenant("12345", "User1");
+            fail("Exception should be thrown!");
+        } catch (Exception ex) {
+            assertExceptionType(ex, "TenantAlreadyExistsException");
+        }
+    }
+
+    @Test
+    public void whenTenantNotFoundThanRemoveTenantThrowsException() {
+        try {
+            ctrl.removeTenant("User1");
+            fail("Exception should be thrown!");
+        } catch (Exception ex) {
+            assertExceptionType(ex, "TenantNotFoundException");
+        }
+    }
+
+    @Test
+    public void whenTenantRemovedAccessIsAlsoRemoved() throws Exception {
+        try {
+            ctrl.addTenant("12345", "User1");
+        } catch (Exception ex) {
+            fail("No exception should be added while creating new tenant");
+        }
+
         assertEquals(DoorStatus.OPEN, ctrl.enterPin("12345"));
-        ctrl.removeTenant("Utilizator1");
+        ctrl.removeTenant("User1");
         try {
             ctrl.enterPin("12345");
+            fail("Exception should be thrown!");
         } catch (Exception e) {
-            assertTrue("Wrong exception name.", e.getClass().getCanonicalName().indexOf("InvalidPinException") != -1);
+            assertExceptionType(e, "InvalidPinException");
         }
+    }
 
+    private void assertExceptionType(final Exception ex, final String expectedExceptionName) {
+        assertTrue("Wrong exception name.", ex.getClass().getCanonicalName().indexOf(expectedExceptionName) != -1);
     }
 }

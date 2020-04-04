@@ -5,10 +5,13 @@
 ![Exercise 1 image](docs/ex1.jpg)
 
 Implement a safe home access Java application based on the diagram above. Consider also following functional requirements in implementing your program:
-1. If pin is wrong enterPin method shall throw an _InvalidPinException_ error
-2. If 3 consecutive attempts are made to enter pin then door is locked forever and enterPin method shall throw TooManyAttemptsException 
-3. If pin is correct door shall be opened or closed depending on current state (if open will be closed, if closed will be opened)
-4. All attempts (successful or not) will be logged in access log list
+1. If pin is wrong _enterPin_ method shall throw an _InvalidPinException_.
+2. If 3 consecutive attempts are made to enter pin then door is locked(until master key pin is used) and _enterPin_ method shall throw TooManyAttemptsException. Any further invocations of _enterPin_ method will throw TooManyAttemptsException.
+3. If master key pin is used, door will be unlocked and retries count will be reset to 0. 
+4. If pin is correct, door shall be opened or closed depending on current state (if open will be closed, if closed will be opened)
+5. All attempts (successful or not) will be logged in access log list.
+6. When tenant already exists by name, _addTenant_ method will throw TenantAlreadyExistsException.
+7. When tenant not found, _removeTenant_ method will throw TenantNotFoundException. 
 
 **NOTE - Java project come with prefiled unit tests. You should make sure all tests pass. You are not allowed to change unit tests (except initialisation of Controller object in the _instantiateDoorController()_ method.**
 

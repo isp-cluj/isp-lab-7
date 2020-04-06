@@ -14,13 +14,13 @@ Implement a safe home access Java application based on the diagram above. Consid
 7. All attempts (successful or not) will be logged in access log list.
 8. Simulate all operations in _main_ from _SafeHome_.
 
-**NOTE - Java project come with prefiled unit tests. You should make sure all tests pass. You are not allowed to change unit tests (except initialisation of Controller object in the _instantiateDoorController()_ method.**
+**NOTE - Java project come with prefiled unit tests. You should make sure all tests pass. You are not allowed to change unit tests (except initialisation of Controller object in the _instantiateDoorController()_ method**).
 
 ## Exercise 2 - State machine diagram
 
-For Safe Home Access application create UML state machine diagram.  
+For Safe Home Access application create _UML state machine_ diagram.  
 
 ## Exercise 3 - Use case diagram
 
-For Safe Home Access application create UML use case diagram. 
+For Safe Home Access application create _UML use case_ diagram. 
 

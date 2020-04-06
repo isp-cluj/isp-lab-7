@@ -17,11 +17,11 @@ public class DoorLockController implements ControllerInterface {
     private List<AccessLog> accessLogs;
     private Integer currentRetries = 0;
 
-    public DoorLockController() {
-        this.door = new Door();
+    public DoorLockController(Door door, List<AccessLog> accessLogs) {
+        this.door = door;
+        this.accessLogs = accessLogs;
         this.validAccess = new HashMap<>();
         this.validAccess.put(new Tenant(ControllerInterface.MASTER_TENANT_NAME), new AccessKey(ControllerInterface.MASTER_KEY));
-        this.accessLogs = new ArrayList<>();
     }
 
     @Override
